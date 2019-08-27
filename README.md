@@ -2,6 +2,8 @@
 
 _**Disclaimer:** This script is provided ‘as-is’ without any warranty or support. Use of this script is at your own risk and I accept no responsibility for any damage caused._
 
+![](https://www.lee-ford.co.uk/images/backup-teamsconfig/example-running.png)
+
 ## Introduction ##
 Backup-TeamsConfig is a PowerShell script allowing you to backup various parts of Microsoft Teams configuration and package it up in to a single file for safe keeping - this includes policies, configurations and voice applications (inc. audio files).
 
