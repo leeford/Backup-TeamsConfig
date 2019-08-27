@@ -8,11 +8,11 @@ Backup-TeamsConfig is a PowerShell script allowing you to backup various parts o
 ### Why? - Doesn't Microsoft already keep copies of this? ###
 I'm sure they do. However it doesn't hurt to have a copy should the unthinkable happen!
 
-Another reason for backing up is it is a way of having a "snapshot" of the configuration at a point in time. With this you can look back and compare it to the existing configuration (this script will do this for you if required). If undocumented changes have taken place (it could be hard to spot without a back up to look back on)
+Another reason for backing up is it is a way of having a "snapshot" of the configuration at a point in time. With this you can look back and compare it to the existing configuration (this script will do this for you if required). If undocumented changes have taken place (it could be hard to spot without a back up to look back on).
 
 ### What does it backup? ###
 
-Currently the script backs up the following:
+Currently the script makes a copy of the following:
 
 | Item                               | Notes                                           |
 | ---------------------------------- | ----------------------------------------------- |
@@ -72,11 +72,11 @@ Currently the script backs up the following:
 
 To get started download the latest release from [GitHub](https://github.com/leeford/Backup-TeamsConfig/releases)
 
-**Take a Backup** - Provide a path (folder) to save the backup file to:
+**Create a Backup** - Provide a path (folder) to save the backup file to:
 
 ```.\Backup-TeamsConfig.ps1 -Action Backup -Path C:\backup```
 
-The script will backup each item and put everything in to a dated zip file:
+The script will backup each item and put everything in to a timestamped zip file:
 
 ![](https://www.lee-ford.co.uk/images/backup-teamsconfig/backup-example.png)
 
@@ -92,20 +92,20 @@ The script will go through each item within the backup and compare it against th
 
 ![](https://www.lee-ford.co.uk/images/backup-teamsconfig/compare-example.png)
 
-**Take a Backup and Post Results to Flow** - Provide a path (folder) to save the backup file to and a URL in Flow to post to:
+**Create a Backup and Post Results to Flow** - Provide a path (folder) to save the backup file to and a URL in Flow to post to:
 
 ```.\Backup-TeamsConfig.ps1 -Action Backup -Path C:\backup -SendToFlowURL "<FlowURL>"```
 
 The Flow URL can be found when creating and saving a "When a HTTP request is received" trigger:
 
-![](https://www.lee-ford.co.uk/images/backup-teamsconfig/compare-example.png)
+![](https://www.lee-ford.co.uk/images/backup-teamsconfig/flow-url-example.png)
 
 The example Flow "BackupTeamsConfig(Report)Flow.zip" found with the script can be imported in to Flow to illustrate how this can be used (in this case send an email)
 
-Successful:
+_Success:_
 ![](https://www.lee-ford.co.uk/images/backup-teamsconfig/success-email-example.png)
 
-Failure:
+_Failed:_
 ![](https://www.lee-ford.co.uk/images/backup-teamsconfig/failed-email-example.png)
 
 **Compare a Backup and Post Results to Flow** - Provide a path (existing backup file) to compare with current configuration and a URL in Flow to post to:
@@ -118,4 +118,3 @@ The example Flow "BackupTeamsConfig(Comparison)Flow.zip" found with the script c
 
 ## Known Issues ##
 - Comparison of certain attributes in Voice Apps are not compared (as the backup and current never match properly). I am looking to resolve this.
-
