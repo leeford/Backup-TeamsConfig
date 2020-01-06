@@ -82,9 +82,6 @@ The script will backup each item and put everything in to a timestamped zip file
 
 ![](https://www.lee-ford.co.uk/images/backup-teamsconfig/backup-example.png)
 
-If you look inside the zip file you can see each item:
-
-![](https://www.lee-ford.co.uk/images/backup-teamsconfig/zip-file-example.png)
 
 **Compare a Backup** - Provide a path (existing backup file) to compare with current configuration:
 
