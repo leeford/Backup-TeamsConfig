@@ -9,7 +9,7 @@ Param (
 
 )
 
-function CheckModuleInstalled {
+function Check-ModuleInstalled {
     param (
 
         [Parameter (mandatory = $true)][String]$module,
@@ -35,7 +35,7 @@ function CheckModuleInstalled {
     
 }
 
-function CheckExistingPSSession {
+function Check-ExistingPSSession {
     param (
         [Parameter (mandatory = $true)][string]$ComputerName
     )
@@ -46,7 +46,7 @@ function CheckExistingPSSession {
 
 }
 
-function GetConfiguration {
+function Get-Configuration {
 
     param (
         
@@ -81,8 +81,8 @@ function Backup-Configuration {
 
     # Special cases with added parameters
     switch ($Type) {
-        CallQueue { $Output = GetConfiguration "Get-CS$Type -First 10000" }
-        Default { $Output = GetConfiguration "Get-CS$Type" }
+        CallQueue { $Output = Get-Configuration "Get-CS$Type -First 10000" }
+        Default { $Output = Get-Configuration "Get-CS$Type" }
     } 
 
     if ($Output -eq "FAILED") {
@@ -100,14 +100,91 @@ function Backup-Configuration {
     elseif ($Output) {
 
         # Save to CliXML object
-        Write-Host "       - Saving $Type to $Type.xml" 
-        $Output | Export-Clixml -Path "$Path\_TeamsConfigBackupTemp_\$Type.xml" -Depth 15
+        Write-Host "       - Saving $Type to XML - $Type.xml... " -NoNewline
+        try {
+
+            $Output | Export-Clixml -Path "$Path\_TeamsConfigBackupTemp_\$Type.xml" -Depth 15
+            Write-Host "SUCCESS" -ForegroundColor Green
+
+        }
+        catch {
+
+            Write-Host "FAILED" -ForegroundColor Red
+
+        }
+
+        # Save to HTML page      
+        # Each Item
+        $Output | ForEach-Object {
+
+            $htmlRows = $null
+
+            # Each Property
+            $_.PSObject.Properties | Sort-Object -Property Name | Foreach-Object {
+
+                if ($script:exclude -notcontains $_.Name) {
+
+                    $htmlRows += "<tr>
+                        <th scope='row'>$($_.Name):</th>
+                        <td>$($_.Value)</td>
+                    </tr>"
+
+                }
+                
+            }
+
+            if ($_.Name) {
+                
+                $title = $_.Name
+
+            } elseif ($_.Identity) {
+                
+                $title = $_.Identity
+
+            }
+
+            $htmlContent += "<div class='card'>
+                    <h5 class='card-header bg-light'>$title</h5>
+                    <div class='card-body'>
+                        <table class='table table-borderless'>
+                            <tbody>
+                                $htmlRows
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <br />"
+
+        }
+
+        $html = "<div class='card'>
+                    <h5 class='card-header bg-light'>Overview</h5>
+                    <div class='card-body'>
+                        <table class='table table-borderless'>
+                            <tbody>
+                                <tr>
+                                    <th scope='row'>Backup Taken:</th>
+                                    <td>$date</td>
+                                </tr>
+                                <tr>
+                                    <th scope='row'>Number of Items:</th>
+                                    <td>$($Output.Identity.Count)</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <br />
+                $htmlContent"
+                
+        Write-Host "       - Saving $Type to HTML - $Type.htm... " -NoNewline
+        Create-HTMLPage -Content $html -PageTitle "$Type" -Path "$Path\_TeamsConfigBackupTemp_\HTML\$Type.htm"
 
         # Item Count
         $Item = @{ }
         $Item.Name = $Type
         $Item.NumberOfObjects = $Output.Identity.Count
-        
+                        
         $script:SavedItems += New-Object PSObject -Property $Item
 
         # If a CQ or AA, download custom audio .WAV files
@@ -147,7 +224,7 @@ function Backup-Configuration {
 
                     $name = $AutoAttendant.DefaultCallFlow.DisplayMenu -replace " ", ""
 
-                    Backup-AudioFile -Id $id -Scenario $name -AppType "AutoAttendant" -Uri $AutoAttendant.DefaultCallFlow.Greetings.AudioFilePrompt.DownloadURI -MessageType "Greeting"
+                    Backup-AudioFile -Id $id -Scenario $name -AppType "AutoAttendant" -Uri $AutoAttendant.DefaultCallFlow.Greetings.AudioFilePrompt.DownloadURI -MessageType "Greeting" 
 
                 }
 
@@ -206,19 +283,29 @@ function Backup-AudioFile {
 
     )
 
-    if ($Scenario) {
+    try {
 
-        Write-Host "       - Saving $scenario $MessageType file for $AppType $id as $AppType-$id-$scenario-$MessageType.wav"
-        Invoke-WebRequest -Uri $uri -OutFile "$Path\_TeamsConfigBackupTemp_\$AppType-$id-$scenario-$MessageType.wav"
+        if ($Scenario) {
+
+            Write-Host "       - Saving $scenario $MessageType file for $AppType $id as $AppType-$id-$scenario-$MessageType.wav... " -NoNewline
+            Invoke-WebRequest -Uri $uri -OutFile "$Path\_TeamsConfigBackupTemp_\AudioFiles\$AppType-$id-$scenario-$MessageType.wav"
+    
+        }
+        else {
+    
+            Write-Host "       - Saving $MessageType file for $AppType $id as $AppType-$id-$MessageType.wav... " -NoNewline
+            Invoke-WebRequest -Uri $uri -OutFile "$Path\_TeamsConfigBackupTemp_\AudioFiles\$AppType-$id-$MessageType.wav"
+    
+        }
+
+        Write-Host "SUCCESS" -ForegroundColor Green
 
     }
-    else {
+    catch {
 
-        Write-Host "       - Saving $MessageType file for $AppType $id as $AppType-$id-$MessageType.wav"
-        Invoke-WebRequest -Uri $uri -OutFile "$Path\_TeamsConfigBackupTemp_\$AppType-$id-$MessageType.wav"
+        Write-Host "FAILED" -ForegroundColor Red
 
     }
- 
 
 }
 
@@ -229,9 +316,6 @@ function Compare-File {
         [Parameter(mandatory = $true)][string]$File
     
     )
-
-    # Attributes to exlude from comparison as they are likely to be different (and not of concern)
-    $exclude = @("PSComputerName", "PSShowComputerName", "RunspaceId", "Status", "DisplayStatus", "DistributionListsLastExpanded", "MusicOnHoldFileDownloadUri", "WelcomeMusicFileDownloadUri", "Element", "Anchor", "Key", "DisplayAgents", "Agents")
 
     # Import object from file
     $backup = Import-Clixml -Path ".\_TeamsConfigBackupTemp_\$File"
@@ -248,11 +332,11 @@ function Compare-File {
     
         Write-Host "    - Comparing Identity: $currentId..." -NoNewline
     
-        $output = GetConfiguration $command
+        $output = Get-Configuration $command
     
         $mismatches = @()
     
-        $_.PSObject.Properties | foreach-object {
+        $_.PSObject.Properties | Foreach-Object {
             
             $name = $_.Name
             $BackupValue = [string]$_.Value
@@ -260,7 +344,7 @@ function Compare-File {
     
             if ($BackupValue -ne $CurrentValue) {
     
-                if ($exclude -notcontains $name) {
+                if ($script:exclude -notcontains $name) {
 
                     $mismatch = @{ }
                     $mismatch.Name = $name
@@ -298,14 +382,54 @@ function Compare-File {
 
 }
 
+function Create-HTMLPage {
+    param (
+
+        [Parameter(mandatory = $true)][string]$Content,
+        [Parameter(mandatory = $true)][string]$PageTitle,
+        [Parameter(mandatory = $true)][string]$Path
+
+    )
+
+    $html = "
+    <div class='p-0 m-0' style='background-color: #F3F2F1'>
+        <div class='container m-3'>
+            <div class='page-header'>
+                <h1>$pageTitle</h1>
+                <h5>Created with <a href='https://www.lee-ford.co.uk/backup-teamsconfig'>Backup-TeamsConfig</a></h5>
+            </div>
+
+            $Content
+
+            </div>
+    </div>"
+
+    try {
+
+        ConvertTo-Html -CssUri "https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" -Body $html -Title $PageTitle | Out-File $Path -Encoding "utf8"
+        Write-Host "SUCCESS" -ForegroundColor Green
+
+    }
+    catch {
+
+        Write-Host "FAILED" -ForegroundColor Red
+        Write-Host $_.Exception -ForegroundColor Red
+
+    }
+
+}
+
+# Attributes to exlude from comparisons and HTML reports as they are likely to be different (and not of concern)
+$script:exclude = @("PSComputerName", "PSShowComputerName", "RunspaceId", "Status", "DisplayStatus", "DistributionListsLastExpanded", "MusicOnHoldFileDownloadUri", "WelcomeMusicFileDownloadUri", "Element", "Anchor", "Key", "DisplayAgents", "Agents")
+
 Write-Host "`n----------------------------------------------------------------------------------------------
-`n Backup-TeamsConfig.ps1 - https://www.github.com/leeford/Backup-TeamsConfig 
+`n Backup-TeamsConfig.ps1 - https://www.lee-ford.co.uk/backup-teamsconfig
 `n----------------------------------------------------------------------------------------------" -ForegroundColor Yellow
 
 # Check SfB module installed
-CheckModuleInstalled -module SkypeOnlineConnector -moduleName "Skype for Business Online module"
+Check-ModuleInstalled -module SkypeOnlineConnector -moduleName "Skype for Business Online module"
 
-$Connected = CheckExistingPSSession -ComputerName "*admin*.online.lync.com"
+$Connected = Check-ExistingPSSession -ComputerName "*admin*.online.lync.com"
 
 if (!$Connected) {
 
@@ -340,8 +464,10 @@ switch ($Action) {
 
         if ($Path -and (Test-Path $Path)) {
 
-            # Create Temp Backup Folder
+            # Create Temp Backup Folders
             New-Item -Path "$Path\_TeamsConfigBackupTemp_\" -ItemType Directory -ErrorAction SilentlyContinue | Out-Null
+            New-Item -Path "$Path\_TeamsConfigBackupTemp_\HTML\" -ItemType Directory -ErrorAction SilentlyContinue | Out-Null
+            New-Item -Path "$Path\_TeamsConfigBackupTemp_\AudioFiles\" -ItemType Directory -ErrorAction SilentlyContinue | Out-Null
 
             # Start Transcript
             $date = Get-Date -UFormat "%Y-%m-%d %H%M"
@@ -406,7 +532,7 @@ switch ($Action) {
                 
                 Write-Host "`r`nThe following items were copied from the current configuration..." -ForegroundColor Green
                 $script:SavedItems | Format-Table -Property Name, NumberOfObjects
-            
+
             }
 
             # Failed Items
@@ -414,14 +540,97 @@ switch ($Action) {
 
                 Write-Host "`r`nThe following items were unable to be copied from the current configuration..." -ForegroundColor Red
                 $script:FailedItems | Format-Table -Property Name, Status
-                $failedItemStatus = "FAILED"
+                $backupStatus = "FAILED"
 
             }
             else {
 
-                $failedItemStatus = "SUCCESS"
+                $backupStatus = "SUCCESS"
 
             }
+
+            # HTML Report
+            $script:SavedItems | Sort-Object -Property Name | Foreach-Object {
+    
+                $htmlSuccessfulRows += "<tr>
+                            <td><a href='./HTML/$($_.name).htm'>$($_.Name)</a></td>
+                            <td>$($_.NumberOfObjects)</td>
+                        </tr>"
+
+            }
+
+            $script:FailedItems | Sort-Object -Property Name | Foreach-Object {
+    
+                $htmlFailedRows += "<tr>
+                            <td><a href='./HTML/$($_.name).htm'>$($_.Name)</a></td>
+                            <td>$($_.NumberOfObjects)</td>
+                        </tr>"
+
+            }
+
+            $html = "<div class='card'>
+                        <h5 class='card-header bg-light'>Overview</h5>
+                        <div class='card-body'>
+                            <table class='table table-borderless'>
+                                <tbody>
+                                    <tr>
+                                        <th scope='row'>Backup Taken:</th>
+                                        <td>$date</td>
+                                    </tr>
+                                    <tr>
+                                        <th scope='row'>Backup Status:</th>
+                                        <td>$backupStatus</td>
+                                    </tr>
+                                    <tr>
+                                        <th scope='row'>Number of Successful (Saved) Item Types:</th>
+                                        <td>$($script:SavedItems.Count)</td>
+                                    </tr>
+                                    <tr>
+                                        <th scope='row'>Number of Failed (Not-Saved) Item Types:</th>
+                                        <td>$($script:FailedItems.Count)</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <br />
+                    <div class='card'>
+                        <h5 class='card-header bg-light'>Successful (Saved) Items</h5>
+                        <div class='card-body'>
+                            <table class='table table-borderless'>
+                                <thead>
+                                    <tr>
+                                        <th scope='col'>Type</th>
+                                        <th scope='col'>Number of Items</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    $htmlSuccessfulRows
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <br />
+                    <div class='card'>
+                        <h5 class='card-header bg-light'>Failed (Not-Saved) Items</h5>
+                        <div class='card-body'>
+                            <table class='table table-borderless'>
+                                <thead>
+                                    <tr>
+                                        <th scope='col'>Type</th>
+                                        <th scope='col'>Number of Items</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    $htmlFailedRows
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <br />"
+        
+            Write-Host " - Saving Backup Report to HTML - Report.htm... " -NoNewline
+            Create-HTMLPage -Content $html -PageTitle "Backup Report" -Path "$Path\_TeamsConfigBackupTemp_\Report.htm"
 
             # Add Temp Backup Folder in to Zip
             $BackupFile = "$Path\TeamsConfigBackup $date.zip"
@@ -462,7 +671,7 @@ switch ($Action) {
                     backupFileSize       = [math]::Round((Get-Item $BackupFile).length / 1KB)
                     computerName         = $env:computername
                     failedItems          = $script:FailedItems
-                    failedItemStatus     = $failedItemStatus
+                    failedItemStatus     = $backupStatus
 
                 }
 

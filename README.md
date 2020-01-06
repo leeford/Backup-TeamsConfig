@@ -94,6 +94,18 @@ The script will go through each item within the backup and compare it against th
 
 ![](https://www.lee-ford.co.uk/images/backup-teamsconfig/compare-example.png)
 
+**View a Backup**
+Once a backup has successfully completed, you can extract the .zip file and view the contents.
+
+![](https://www.lee-ford.co.uk/images/backup-teamsconfig/view-backup.png)
+
+Included in a backup:
+
+- HTML Reports - Open Report.htm and view the status of the backup and associated backed up items
+  ![](https://www.lee-ford.co.uk/images/backup-teamsconfig/backup-report.gif)
+- CLIXML Files - Raw CLIXML files captured that include ALL settings. These are used when comparing backup files to current configuration
+- Audio Files - Recordings attached to Call Queues and Auto Attendants
+
 **Create a Backup and Post Results to Flow** - Provide a path (folder) to save the backup file to and a URL in Flow to post to:
 
 ```.\Backup-TeamsConfig.ps1 -Action Backup -Path C:\backup -SendToFlowURL "<FlowURL>"```
@@ -105,9 +117,11 @@ The Flow URL can be found when creating and saving a "When a HTTP request is rec
 The example Flow "BackupTeamsConfig(Report)Flow.zip" found with the script can be imported in to Flow to illustrate how this can be used (in this case send an email)
 
 _Success:_
+
 ![](https://www.lee-ford.co.uk/images/backup-teamsconfig/success-email-example.png)
 
 _Failed:_
+
 ![](https://www.lee-ford.co.uk/images/backup-teamsconfig/failed-email-example.png)
 
 **Compare a Backup and Post Results to Flow** - Provide a path (existing backup file) to compare with current configuration and a URL in Flow to post to:
@@ -120,3 +134,4 @@ The example Flow "BackupTeamsConfig(Comparison)Flow.zip" found with the script c
 
 ## Known Issues ##
 - Comparison of certain attributes in Voice Apps are not compared (as the backup and current never match properly). I am looking to resolve this.
+- HTML reports with nested configuration will not show correctly in tables. For example, the "CallFlows" of an Auto Attendant will show as a the string value of the Object "Microsoft.Rtc.Management.Hosted.OAA.Models.CallFlow" rather than the configuration.
