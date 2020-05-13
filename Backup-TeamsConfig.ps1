@@ -527,6 +527,11 @@ switch ($Action) {
             Backup-Configuration -Type "AutoAttendant"
             Backup-Configuration -Type "OnlineSchedule"
 
+            # Misc
+            Write-Host "`r`nBacking up Misc configuration..."
+
+            Backup-Configuration -Type "TenantFederationConfiguration"
+
             # Saved Items
             if ($script:SavedItems) {
                 

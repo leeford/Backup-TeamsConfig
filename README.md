@@ -63,6 +63,7 @@ Currently the script makes a copy of the following:
 | CallQueue                          | Includes Music on Hold and Greeting audio files |
 | AutoAttendant                      | Includes Menu Prompt and Greeting audio files   |
 | OnlineSchedule (for AutoAttendant) |
+| TenantFederationConfiguration|
 
 
 
