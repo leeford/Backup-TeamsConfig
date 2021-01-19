@@ -103,7 +103,7 @@ function Backup-Configuration {
         Write-Host "       - Saving $Type to XML - $Type.xml... " -NoNewline
         try {
 
-            $Output | Export-Clixml -Path "$Path\_TeamsConfigBackupTemp_\$Type.xml" -Depth 15
+            $Output | Export-Clixml -Path "$Path/_TeamsConfigBackupTemp_/$Type.xml" -Depth 15
             Write-Host "SUCCESS" -ForegroundColor Green
 
         }
@@ -179,7 +179,7 @@ function Backup-Configuration {
                 $htmlContent"
                 
         Write-Host "       - Saving $Type to HTML - $Type.htm... " -NoNewline
-        Create-HTMLPage -Content $html -PageTitle "$Type" -Path "$Path\_TeamsConfigBackupTemp_\HTML\$Type.htm"
+        Create-HTMLPage -Content $html -PageTitle "$Type" -Path "$Path/_TeamsConfigBackupTemp_/HTML/$Type.htm"
 
         # Item Count
         $Item = @{ }
@@ -289,13 +289,13 @@ function Backup-AudioFile {
         if ($Scenario) {
 
             Write-Host "       - Saving $scenario $MessageType file for $AppType $id as $AppType-$id-$scenario-$MessageType.wav... " -NoNewline
-            Invoke-WebRequest -Uri $uri -OutFile "$Path\_TeamsConfigBackupTemp_\AudioFiles\$AppType-$id-$scenario-$MessageType.wav"
+            Invoke-WebRequest -Uri $uri -OutFile "$Path/_TeamsConfigBackupTemp_/AudioFiles/$AppType-$id-$scenario-$MessageType.wav"
     
         }
         else {
     
             Write-Host "       - Saving $MessageType file for $AppType $id as $AppType-$id-$MessageType.wav... " -NoNewline
-            Invoke-WebRequest -Uri $uri -OutFile "$Path\_TeamsConfigBackupTemp_\AudioFiles\$AppType-$id-$MessageType.wav"
+            Invoke-WebRequest -Uri $uri -OutFile "$Path/_TeamsConfigBackupTemp_/AudioFiles/$AppType-$id-$MessageType.wav"
     
         }
 
@@ -319,7 +319,7 @@ function Compare-File {
     )
 
     # Import object from file
-    $backup = Import-Clixml -Path ".\_TeamsConfigBackupTemp_\$File"
+    $backup = Import-Clixml -Path "./_TeamsConfigBackupTemp_/$File"
 
     $type = $File -replace ".xml", ""
 
@@ -466,13 +466,13 @@ switch ($Action) {
         if ($Path -and (Test-Path $Path)) {
 
             # Create Temp Backup Folders
-            New-Item -Path "$Path\_TeamsConfigBackupTemp_\" -ItemType Directory -ErrorAction SilentlyContinue | Out-Null
-            New-Item -Path "$Path\_TeamsConfigBackupTemp_\HTML\" -ItemType Directory -ErrorAction SilentlyContinue | Out-Null
-            New-Item -Path "$Path\_TeamsConfigBackupTemp_\AudioFiles\" -ItemType Directory -ErrorAction SilentlyContinue | Out-Null
+            New-Item -Path "$Path/_TeamsConfigBackupTemp_/" -ItemType Directory -ErrorAction SilentlyContinue | Out-Null
+            New-Item -Path "$Path/_TeamsConfigBackupTemp_/HTML/" -ItemType Directory -ErrorAction SilentlyContinue | Out-Null
+            New-Item -Path "$Path/_TeamsConfigBackupTemp_/AudioFiles/" -ItemType Directory -ErrorAction SilentlyContinue | Out-Null
 
             # Start Transcript
             $date = Get-Date -UFormat "%Y-%m-%d %H%M"
-            Start-Transcript -Path "$Path\_TeamsConfigBackupTemp_\transcript_$date.txt" | Out-Null
+            Start-Transcript -Path "$Path/_TeamsConfigBackupTemp_/transcript_$date.txt" | Out-Null
 
             # Items
             $script:SavedItems = @()
@@ -636,10 +636,10 @@ switch ($Action) {
                     <br />"
         
             Write-Host " - Saving Backup Report to HTML - Report.htm... " -NoNewline
-            Create-HTMLPage -Content $html -PageTitle "Backup Report" -Path "$Path\_TeamsConfigBackupTemp_\Report.htm"
+            Create-HTMLPage -Content $html -PageTitle "Backup Report" -Path "$Path/_TeamsConfigBackupTemp_/Report.htm"
 
             # Add Temp Backup Folder in to Zip
-            $BackupFile = "$Path\TeamsConfigBackup $date.zip"
+            $BackupFile = "$Path/TeamsConfigBackup $date.zip"
 
             Write-Host "`r`nAdding files to zip file $BackupFile... " -ForegroundColor Yellow -NoNewline
 
@@ -651,7 +651,7 @@ switch ($Action) {
             # Add all files to Zip
             $SaveBackupFile = try {
             
-                Compress-Archive -Path "$Path\_TeamsConfigBackupTemp_\*" -DestinationPath $BackupFile -CompressionLevel Optimal
+                Compress-Archive -Path "$Path/_TeamsConfigBackupTemp_/*" -DestinationPath $BackupFile -CompressionLevel Optimal
                 Write-Host "SUCCESS" -ForegroundColor Green
                 "SUCCESS"
 
@@ -697,7 +697,7 @@ switch ($Action) {
         }
 
         # Delete Temp Backup Folder
-        Remove-Item -Path "$Path\_TeamsConfigBackupTemp_\" -Force -Recurse | Out-Null
+        Remove-Item -Path "$Path/_TeamsConfigBackupTemp_/" -Force -Recurse | Out-Null
 
     }
 
@@ -715,10 +715,10 @@ switch ($Action) {
 
             # Extract File
             Write-Host "Extracting $Path..."
-            Expand-Archive -Path $Path -DestinationPath ".\_TeamsConfigBackupTemp_\" -Force
+            Expand-Archive -Path $Path -DestinationPath "./_TeamsConfigBackupTemp_/" -Force
 
             # Loop through each XML file
-            $files = Get-ChildItem -Path ".\_TeamsConfigBackupTemp_\*.xml"
+            $files = Get-ChildItem -Path "./_TeamsConfigBackupTemp_/*.xml"
             $files | ForEach-Object {
 
                 Compare-File -File $_.Name
@@ -726,7 +726,7 @@ switch ($Action) {
             }
 
             # Delete Temp Backup Folder
-            Remove-Item -Path ".\_TeamsConfigBackupTemp_\" -Force -Recurse | Out-Null
+            Remove-Item -Path "./_TeamsConfigBackupTemp_/" -Force -Recurse | Out-Null
     
             # If mismatches found
             if ($script:AllMismatches) {
