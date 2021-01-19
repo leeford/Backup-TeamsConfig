@@ -137,7 +137,8 @@ function Backup-Configuration {
                 
                 $title = $_.Name
 
-            } elseif ($_.Identity) {
+            }
+            elseif ($_.Identity) {
                 
                 $title = $_.Identity
 
@@ -426,14 +427,14 @@ Write-Host "`n------------------------------------------------------------------
 `n Backup-TeamsConfig.ps1 - https://www.lee-ford.co.uk/backup-teamsconfig
 `n----------------------------------------------------------------------------------------------" -ForegroundColor Yellow
 
-# Check SfB module installed
-Check-ModuleInstalled -module SkypeOnlineConnector -moduleName "Skype for Business Online module"
+# Check Teams module installed
+Check-ModuleInstalled -module MicrosoftTeams -moduleName "Microsoft Teams module"
 
-$Connected = Check-ExistingPSSession -ComputerName "*admin*.online.lync.com"
+$Connected = Check-ExistingPSSession -ComputerName "api.interfaces.records.teams.microsoft.com"
 
 if (!$Connected) {
 
-    Write-Host "No existing Skype Online PowerShell Session..."
+    Write-Host "No existing PowerShell Session..."
 
     if ($OverrideAdminDomain) {
 
@@ -452,7 +453,7 @@ if (!$Connected) {
 }
 else {
 
-    Write-Host "Using existing Skype Online PowerShell Session..."
+    Write-Host "Using existing PowerShell Session..."
 
 }
 
