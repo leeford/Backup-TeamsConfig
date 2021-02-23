@@ -71,7 +71,7 @@ Currently the script makes a copy of the following:
 
 ## Usage ##
 
-> Before you can use this tool you need to ensure you have the Microsoft Teams powershell module installed - https://docs.microsoft.com/en-us/microsoftteams/teams-powershell-install
+> Before you can use this tool you need to ensure you have the Microsoft Teams PowerShell module installed - <https://docs.microsoft.com/en-us/microsoftteams/teams-powershell-install>
 
 To get started download the latest release from [GitHub](https://github.com/leeford/Backup-TeamsConfig/releases)
 
