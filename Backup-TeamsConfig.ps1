@@ -4,8 +4,7 @@ Param (
 
     [Parameter(mandatory = $true)][ValidateSet('Backup', 'Compare')][string]$Action,
     [Parameter(mandatory = $false)][string]$Path,
-    [Parameter(mandatory = $false)][uri]$SendToFlowURL,
-    [Parameter(mandatory = $false)][string]$OverrideAdminDomain
+    [Parameter(mandatory = $false)][uri]$SendToFlowURL
 
 )
 
@@ -33,17 +32,6 @@ function Check-ModuleInstalled {
 
     }
     
-}
-
-function Check-ExistingPSSession {
-    param (
-        [Parameter (mandatory = $true)][string]$ComputerName
-    )
-    
-    $OpenSessions = Get-PSSession | Where-Object { $_.ComputerName -like $ComputerName -and $_.State -eq "Opened" }
-
-    return $OpenSessions
-
 }
 
 function Get-Configuration {
@@ -430,32 +418,8 @@ Write-Host "`n------------------------------------------------------------------
 # Check Teams module installed
 Check-ModuleInstalled -module MicrosoftTeams -moduleName "Microsoft Teams module"
 
-$Connected = Check-ExistingPSSession -ComputerName "api.interfaces.records.teams.microsoft.com"
-
-if (!$Connected) {
-
-    Write-Host "No existing PowerShell Session..."
-
-    if ($OverrideAdminDomain) {
-
-        $CSSession = New-CsOnlineSession -OverrideAdminDomain $OverrideAdminDomain
-
-    }
-    else {
-
-        $CSSession = New-CsOnlineSession
-
-    }
-
-    # Import Session
-    Import-PSSession $CSSession -AllowClobber | Out-Null
-
-}
-else {
-
-    Write-Host "Using existing PowerShell Session..."
-
-}
+# Connect to Teams
+Connect-MicrosoftTeams
 
 switch ($Action) {
     Backup {
@@ -479,39 +443,24 @@ switch ($Action) {
             $script:FailedItems = @()
 
             # Teams Policies
-
-            # Get all Teams Policies
             Write-Host "`r`nBacking up Teams Policies..."
-
-            $TeamsPolicies = Get-Command "Get-CS*Teams*Policy*"
-
-            # Loop through
-            $TeamsPolicies | ForEach-Object {
+            Get-Command "Get-CS*Teams*Policy*" | ForEach-Object {
 
                 $policy = $_.Name -replace "Get-CS", ""
-
                 Backup-Configuration -Type $policy
 
             }
 
             # Teams Configuration
-
-            # Get all Teams Configuration
             Write-Host "`r`nBacking up Teams Configuration..."
-
-            $TeamsConfigs = Get-Command "Get-CS*Teams*Configuration*"
-
-            # Loop through
-            $TeamsConfigs | ForEach-Object {
+            Get-Command "Get-CS*Teams*Configuration*" | ForEach-Object {
 
                 $config = $_.Name -replace "Get-CS", ""
-
                 Backup-Configuration -Type $config
 
             }
 
             # Voice
-
             # Voice Routing
             Write-Host "`r`nBacking up Teams Voice Routing Configuration..."
 
@@ -529,9 +478,13 @@ switch ($Action) {
             Backup-Configuration -Type "OnlineSchedule"
 
             # Misc
-            Write-Host "`r`nBacking up Misc configuration..."
+            Write-Host "`r`nBacking up misc Tenant Configuration..."
+            Get-Command "Get-CSTenant*" | ForEach-Object {
 
-            Backup-Configuration -Type "TenantFederationConfiguration"
+                $config = $_.Name -replace "Get-CS", ""
+                Backup-Configuration -Type $config
+
+            }
 
             # Saved Items
             if ($script:SavedItems) {
