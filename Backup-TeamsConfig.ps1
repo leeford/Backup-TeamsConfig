@@ -443,39 +443,24 @@ switch ($Action) {
             $script:FailedItems = @()
 
             # Teams Policies
-
-            # Get all Teams Policies
             Write-Host "`r`nBacking up Teams Policies..."
-
-            $TeamsPolicies = Get-Command "Get-CS*Teams*Policy*"
-
-            # Loop through
-            $TeamsPolicies | ForEach-Object {
+            Get-Command "Get-CS*Teams*Policy*" | ForEach-Object {
 
                 $policy = $_.Name -replace "Get-CS", ""
-
                 Backup-Configuration -Type $policy
 
             }
 
             # Teams Configuration
-
-            # Get all Teams Configuration
             Write-Host "`r`nBacking up Teams Configuration..."
-
-            $TeamsConfigs = Get-Command "Get-CS*Teams*Configuration*"
-
-            # Loop through
-            $TeamsConfigs | ForEach-Object {
+            Get-Command "Get-CS*Teams*Configuration*" | ForEach-Object {
 
                 $config = $_.Name -replace "Get-CS", ""
-
                 Backup-Configuration -Type $config
 
             }
 
             # Voice
-
             # Voice Routing
             Write-Host "`r`nBacking up Teams Voice Routing Configuration..."
 
@@ -493,9 +478,13 @@ switch ($Action) {
             Backup-Configuration -Type "OnlineSchedule"
 
             # Misc
-            Write-Host "`r`nBacking up Misc configuration..."
+            Write-Host "`r`nBacking up misc Tenant Configuration..."
+            Get-Command "Get-CSTenant*" | ForEach-Object {
 
-            Backup-Configuration -Type "TenantFederationConfiguration"
+                $config = $_.Name -replace "Get-CS", ""
+                Backup-Configuration -Type $config
+
+            }
 
             # Saved Items
             if ($script:SavedItems) {
