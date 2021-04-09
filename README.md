@@ -22,8 +22,8 @@ Currently the script makes a copy of the following:
 | Get-CSTeams\*Configuration          | Get-TeamsMeetingConfiguration, Get-TeamsClientConfiguration    
 | Get-CSTenant\* | Get-CSTenant, Get-CSTenantNetworkSite |
 | Voice Routing | Get-CSOnlinePSTNUsage, Get-CSOnlineVoiceRoute |
-| Call Queues                          | Music on Hold and Greeting audio files |
-| Auto Attendants                      | Menu Prompt, Greeting audio files and schedule   |
+| Call Queues                          | Configuration, music on hold and greetings |
+| Auto Attendants                      | Configuration, menu prompts, greetings and schedule   |
 
 > Note: The script will backup Teams policies or configuration by using a wildcard. If a new type of policy or configuration appears e.g. "Get-CSTeamsExamplePolicy" it will automatically get included within the backup.
 
