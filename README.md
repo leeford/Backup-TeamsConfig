@@ -16,58 +16,16 @@ Another reason for backing up is it is a way of having a "snapshot" of the confi
 
 Currently the script makes a copy of the following:
 
-| Item                               | Notes                                           |
+| Item                               | Examples                                           |
 | ---------------------------------- | ----------------------------------------------- |
-| TeamsAppPermissionPolicy           |
-| TeamsAppSetupPolicy                |
-| TeamsCallingPolicy                 |
-| TeamsCallParkPolicy                |
-| TeamsChannelsPolicy                |
-| TeamsComplianceRecordingPolicy     |
-| TeamsEducationAssignmentsAppPolicy |
-| TeamsEmergencyCallingPolicy        |
-| TeamsEmergencyCallRoutingPolicy    |
-| TeamsFeedbackPolicy                |
-| TeamsMeetingBroadcastPolicy        |
-| TeamsMeetingPolicy                 |
-| TeamsMessagingPolicy               |
-| TeamsAppPermissionPolicy           |
-| TeamsAppSetupPolicy                |
-| TeamsCallingPolicy                 |
-| TeamsCallParkPolicy                |
-| TeamsChannelsPolicy                |
-| TeamsComplianceRecordingPolicy     |
-| TeamsEducationAssignmentsAppPolicy |
-| TeamsEmergencyCallingPolicy        |
-| TeamsEmergencyCallRoutingPolicy    |
-| TeamsFeedbackPolicy                |
-| TeamsMeetingBroadcastPolicy        |
-| TeamsMeetingPolicy                 |
-| TeamsMessagingPolicy               |
-| TeamsNotificationAndFeedsPolicy    |
-| TeamsUpgradePolicy                 |
-| TeamsVideoInteropServicePolicy     |
-| TeamsClientConfiguration           |
-| TeamsGuestCallingConfiguration     |
-| TeamsGuestMeetingConfiguration     |
-| TeamsGuestMessagingConfiguration   |
-| TeamsMeetingBroadcastConfiguration |
-| TeamsMeetingConfiguration          |
-| TeamsMigrationConfiguration        |
-| TeamsUpgradeConfiguration          |
-| OnlinePSTNUsage                    |
-| OnlineVoiceRoutingPolicy           |
-| OnlinePSTNGateway                  |
-| OnlineVoiceRoute                   |
-| TenantDialPlan                     |
-| CallQueue                          | Includes Music on Hold and Greeting audio files |
-| AutoAttendant                      | Includes Menu Prompt and Greeting audio files   |
-| OnlineSchedule (for AutoAttendant) |
-| TenantFederationConfiguration|
+| Get-Teams\*Policy           | Get-TeamsAppPermissionPolicy, Get-TeamsMessagingPolicy 
+| Get-CSTeams\*Configuration          | Get-TeamsMeetingConfiguration, Get-TeamsClientConfiguration    
+| Get-CSTenant\* | Get-CSTenant, Get-CSTenantNetworkSite |
+| Voice Routing | Get-CSOnlinePSTNUsage, Get-CSOnlineVoiceRoute |
+| Call Queues                          | Music on Hold and Greeting audio files |
+| Auto Attendants                      | Menu Prompt, Greeting audio files and schedule   |
 
-
-
-> Note: The script will backup any Teams policy or configuration by using a wildcard. If a new type of policy or configuration appears e.g. "Get-CSTeamsExamplePolicy" it will automatically get included within the backup.
+> Note: The script will backup Teams policies or configuration by using a wildcard. If a new type of policy or configuration appears e.g. "Get-CSTeamsExamplePolicy" it will automatically get included within the backup.
 
 ## Usage ##
 
