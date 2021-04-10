@@ -137,7 +137,8 @@ function Backup-Configuration {
                 
                 $title = $_.Name
 
-            } elseif ($_.Identity) {
+            }
+            elseif ($_.Identity) {
                 
                 $title = $_.Identity
 
@@ -518,7 +519,6 @@ switch ($Action) {
             Backup-Configuration -Type "OnlineVoiceRoutingPolicy"
             Backup-Configuration -Type "OnlinePSTNGateway"
             Backup-Configuration -Type "OnlineVoiceRoute"
-            Backup-Configuration -Type "TenantDialPlan"
 
             # Voice Apps
             Write-Host "`r`nBacking up Teams Voice Apps Configuration..."
