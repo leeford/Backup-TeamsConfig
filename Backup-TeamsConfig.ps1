@@ -408,6 +408,17 @@ function Create-HTMLPage {
 
 }
 
+function Check-ExistingPSSession {
+    param (
+        [Parameter (mandatory = $true)][string]$ComputerName
+    )
+    
+    $OpenSessions = Get-PSSession | Where-Object { $_.ComputerName -like $ComputerName -and $_.State -eq "Opened" }
+
+    return $OpenSessions
+
+}
+
 # Attributes to exlude from comparisons and HTML reports as they are likely to be different (and not of concern)
 $script:exclude = @("PSComputerName", "PSShowComputerName", "RunspaceId", "Status", "DisplayStatus", "DistributionListsLastExpanded", "MusicOnHoldFileDownloadUri", "WelcomeMusicFileDownloadUri", "Element", "Anchor", "Key", "DisplayAgents", "Agents")
 
@@ -418,8 +429,20 @@ Write-Host "`n------------------------------------------------------------------
 # Check Teams module installed
 Check-ModuleInstalled -module MicrosoftTeams -moduleName "Microsoft Teams module"
 
-# Connect to Teams
-Connect-MicrosoftTeams
+$Connected = Check-ExistingPSSession -ComputerName "api.interfaces.records.teams.microsoft.com"
+
+if (!$Connected) {
+
+    Write-Host "No existing PowerShell Session..."
+
+    Connect-MicrosoftTeams
+
+}
+else {
+
+    Write-Host "Using existing PowerShell Session..."
+
+}
 
 switch ($Action) {
     Backup {
