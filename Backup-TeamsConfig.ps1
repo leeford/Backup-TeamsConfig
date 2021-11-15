@@ -59,7 +59,7 @@ function Get-Configuration {
 
 function Backup-Configuration {
     param (
-        
+
         [Parameter(mandatory = $true)][String]$Type
 
     )
@@ -101,7 +101,7 @@ function Backup-Configuration {
 
         }
 
-        # Save to HTML page      
+        # Save to HTML page
         # Each Item
         $Output | ForEach-Object {
 
@@ -172,7 +172,7 @@ function Backup-Configuration {
         # Item Count
         $Item = @{ }
         $Item.Name = $Type
-        $Item.NumberOfObjects = $Output.Identity.Count
+        $Item.NumberOfObjects = $Output.Count
                         
         $script:SavedItems += New-Object PSObject -Property $Item
 
@@ -469,8 +469,8 @@ switch ($Action) {
             Write-Host "`r`nBacking up Teams Policies..."
             Get-Command "Get-CS*Teams*Policy*" | ForEach-Object {
 
-                $policy = $_.Name -replace "Get-CS", ""
-                Backup-Configuration -Type $policy
+                $config = $_.Name -replace "Get-CS", ""
+                Backup-Configuration -Type $config
 
             }
 
@@ -488,9 +488,31 @@ switch ($Action) {
             Write-Host "`r`nBacking up Teams Voice Routing Configuration..."
 
             Backup-Configuration -Type "OnlinePSTNUsage"
-            Backup-Configuration -Type "OnlineVoiceRoutingPolicy"
             Backup-Configuration -Type "OnlinePSTNGateway"
+            Backup-Configuration -Type "VoiceNormalizationRule "
             Backup-Configuration -Type "OnlineVoiceRoute"
+            Backup-Configuration -Type "OnlineVoiceRoutingPolicy"
+
+            Get-Command "Get-CSCalling*" | ForEach-Object {
+
+                $config = $_.Name -replace "Get-CS", ""
+                Backup-Configuration -Type $config
+
+            }
+
+            Get-Command "Get-CSOnlineLis*" | ForEach-Object {
+
+                $config = $_.Name -replace "Get-CS", ""
+                Backup-Configuration -Type $config
+
+            }
+
+            Get-Command "Get-CS*UnassignedNumber*" | ForEach-Object {
+
+                $config = $_.Name -replace "Get-CS", ""
+                Backup-Configuration -Type $config
+
+            }
 
             # Voice Apps
             Write-Host "`r`nBacking up Teams Voice Apps Configuration..."
